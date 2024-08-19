@@ -10,14 +10,25 @@ class CircularAnimatedProgressBar extends StatefulWidget {
   late double progress;
 
   /// 大小
-  late double size;
+  late double size = 150;
+
+  /// 是否显示进度
+  late bool isShowProgress;
+
+  /// 是否显示进度的样式
+  late TextStyle showProgressTextStyle;
 
   /// 构造方法
   CircularAnimatedProgressBar(
-      {super.key, this.progress = 0.0, double size = 150})
-      : assert(size > 0, "The size must be greater than 0"),
-        assert(progress < 0 || progress > 1,
-            "Progress must be less than 1 and greater than 0");
+      {super.key,
+      this.size = 150.0,
+      this.progress = .2,
+      this.isShowProgress = true,
+      this.showProgressTextStyle = const TextStyle(
+          fontSize: 24, fontWeight: FontWeight.bold, color: Colors.white)})
+      : assert(progress >= 0.0 && progress <= 1.0,
+            "Progress must be less than 1 and greater than 0"),
+        assert(size > 0.0, "The size must be greater than 0");
   @override
   _CircularAnimatedProgressBarState createState() =>
       _CircularAnimatedProgressBarState();
@@ -27,16 +38,33 @@ class _CircularAnimatedProgressBarState
     extends State<CircularAnimatedProgressBar> {
   @override
   Widget build(BuildContext context) {
-    return WaterWaveProgressBar(size: widget.size, progress: widget.progress);
+    return WaterWaveProgressBar(
+      size: widget.size,
+      progress: widget.progress,
+      isShowProgress: widget.isShowProgress,
+      showProgressTextStyle: widget.showProgressTextStyle,
+    );
   }
 }
 
 class WaterWaveProgressBar extends StatefulWidget {
+  /// 大小
   final double size;
+
+  /// 进度
   final double progress;
 
+  /// 是否显示进度
+  final bool isShowProgress;
+
+  /// 是否显示进度的样式
+  final TextStyle showProgressTextStyle;
   const WaterWaveProgressBar(
-      {super.key, required this.size, required this.progress});
+      {super.key,
+      required this.size,
+      required this.progress,
+      required this.isShowProgress,
+      required this.showProgressTextStyle});
 
   @override
   _WaterWaveProgressBarState createState() => _WaterWaveProgressBarState();
@@ -62,7 +90,7 @@ class _WaterWaveProgressBarState extends State<WaterWaveProgressBar>
 
     _progressAnimation =
         Tween<double>(begin: _oldProgress, end: widget.progress).animate(
-      CurvedAnimation(parent: _progressController, curve: Curves.easeInOut),
+      CurvedAnimation(parent: _progressController, curve: Curves.linear),
     );
 
     // 水波纹动画控制器，保持循环
@@ -79,8 +107,7 @@ class _WaterWaveProgressBarState extends State<WaterWaveProgressBar>
       _oldProgress = oldWidget.progress;
       _progressAnimation =
           Tween<double>(begin: _oldProgress, end: widget.progress).animate(
-        CurvedAnimation(
-            parent: _progressController, curve: Curves.easeInOutCirc),
+        CurvedAnimation(parent: _progressController, curve: Curves.linear),
       );
 
       // 开始执行进度动画
@@ -110,13 +137,10 @@ class _WaterWaveProgressBarState extends State<WaterWaveProgressBar>
                   painter: MultiLayerWaterWavePainter(
                       _waveController.value, _progressAnimation.value),
                 )),
-            Text(
-              '${(_progressAnimation.value * 100).toInt()}%',
-              style: const TextStyle(
-                  fontSize: 24,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.white),
-            ),
+            widget.isShowProgress
+                ? Text('${(_progressAnimation.value * 100).toInt()}%',
+                    style: widget.showProgressTextStyle)
+                : const SizedBox()
           ],
         );
       },
@@ -147,10 +171,10 @@ class MultiLayerWaterWavePainter extends CustomPainter {
     Path wavePath3 = Path();
 
     // 第一层波浪
-    for (double i = -waveLength / 4; i <= waveLength * 1.25; i++) {
+    for (double i = -waveLength / 4; i <= waveLength * 1.5; i++) {
       double dx = i;
       double dy =
-          sin((i / waveLength * 2 * pi) + (waveAnimationValue * 2 * pi)) *
+          sin((i / waveLength * 2.5 * pi) + (waveAnimationValue * 2 * pi)) *
                   waveHeight +
               centerY;
       if (i == -waveLength / 4) {
@@ -178,10 +202,11 @@ class MultiLayerWaterWavePainter extends CustomPainter {
     // 第三层波浪
     for (double i = -waveLength / 4; i <= waveLength * 1.25; i++) {
       double dx = i;
-      double dy =
-          sin((i / waveLength * 2 * pi) + (waveAnimationValue * 2 * pi) + pi) *
-                  waveHeight +
-              centerY;
+      double dy = sin((i / waveLength * 1.5 * pi) +
+                  (waveAnimationValue * 2 * pi) +
+                  pi) *
+              waveHeight +
+          centerY;
       if (i == -waveLength / 4) {
         wavePath3.moveTo(dx, dy);
       } else {
@@ -189,16 +214,16 @@ class MultiLayerWaterWavePainter extends CustomPainter {
       }
     }
 
-    wavePath1.lineTo(size.width * 1.2, size.height);
-    wavePath1.lineTo(-waveLength / 3, size.height);
+    wavePath1.lineTo(size.width * 3, size.height);
+    wavePath1.lineTo(-waveLength / 4, size.height);
     wavePath1.close();
 
-    wavePath2.lineTo(size.width * 1.4, size.height);
-    wavePath2.lineTo(-waveLength / 3, size.height);
+    wavePath2.lineTo(size.width * 3, size.height);
+    wavePath2.lineTo(-waveLength / 4, size.height);
     wavePath2.close();
 
-    wavePath3.lineTo(size.width * 1.8, size.height);
-    wavePath3.lineTo(-waveLength / 3, size.height);
+    wavePath3.lineTo(size.width * 3, size.height);
+    wavePath3.lineTo(-waveLength / 4, size.height);
     wavePath3.close();
 
     // 绘制圆形背景

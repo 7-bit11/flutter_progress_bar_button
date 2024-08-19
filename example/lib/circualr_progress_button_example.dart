@@ -14,7 +14,12 @@ class _WaterWaveProgressPageState extends State<CircualrProgressButtonExample> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: const Text("水波球形进度条")),
-      body: CircularAnimatedProgressBar(),
+      body: Center(
+        child: CircularAnimatedProgressBar(
+          size: 200,
+          progress: .3,
+        ),
+      ),
     );
   }
 }
