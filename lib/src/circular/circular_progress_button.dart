@@ -28,6 +28,9 @@ class CircularAnimatedProgressBar extends StatefulWidget {
   /// 2、4、6 排序显示为 最上层为 6 、4 、2
   late List<Color> colorsWave;
 
+  /// 背景颜色
+  late Color backgroundColor;
+
   /// 构造方法
   CircularAnimatedProgressBar(
       {super.key,
@@ -36,19 +39,22 @@ class CircularAnimatedProgressBar extends StatefulWidget {
       this.isShowProgress = true,
       this.curve = Curves.linear,
       this.waveHeight = 12,
+      this.backgroundColor = const Color(0x802196f3),
 
       /// 默认为蓝色
       /// 2、4、6 排序显示为 最上层为 6 、4 、2
       this.colorsWave = const [
-        Color(0x1A2196f3),
+        Color(0x4D2196f3),
         Color(0x662196f3),
-        Color(0xCC2196f3)
+        Color(0xCC2196f3),
       ],
       this.showProgressTextStyle = const TextStyle(
           fontSize: 24, fontWeight: FontWeight.bold, color: Colors.white)})
       : assert(progress >= 0.0 && progress <= 1.0,
             "Progress must be less than 1 and greater than 0"),
-        assert(size > 0.0, "The size must be greater than 0");
+        assert(size > 0.0, "The size must be greater than 0"),
+        assert(colorsWave.isNotEmpty && colorsWave.length <= 3,
+            "ColorsWave must be not empty and length less than 3");
 
   @override
   _CircularAnimatedProgressBarState createState() =>
@@ -130,7 +136,8 @@ class _CircularAnimatedProgressBarState
                       waveAnimationValue: _waveController.value,
                       progress: _progressAnimation.value,
                       waveHeight: widget.waveHeight,
-                      colorsWave: widget.colorsWave),
+                      colorsWave: widget.colorsWave,
+                      backgroundColor: widget.backgroundColor),
                 )),
             widget.isShowProgress
                 ? Text('${(_progressAnimation.value * 100).toInt()}%',
@@ -157,101 +164,72 @@ class MultiLayerWaterWavePainter extends CustomPainter {
   /// 默认为蓝色
   /// 2、4、6 排序显示为 最上层为 6 、4 、2
   final List<Color> colorsWave;
+
+  final Color backgroundColor;
   MultiLayerWaterWavePainter(
       {required this.waveAnimationValue,
       required this.progress,
       required this.waveHeight,
-      required this.colorsWave});
+      required this.colorsWave,
+      required this.backgroundColor});
 
   @override
   void paint(Canvas canvas, Size size) {
     double waveLength = size.width;
     double radius = size.width / 2;
     double centerY = size.height * (1 - progress);
+    Paint circlePaint = Paint()..color = backgroundColor;
+    List<Paint> wavePaints = [];
+    List<Path> paths = [];
 
-    Paint circlePaint = Paint()..color = Colors.blue.withOpacity(0.5);
-    Paint wavePaint1 = Paint()..color = Colors.blue.withOpacity(0.4);
-    Paint wavePaint2 = Paint()..color = Colors.blue.withOpacity(0.6);
-    Paint wavePaint3 = Paint()..color = Colors.blue.withOpacity(0.8);
-    Paint wavePaint4 = Paint()..color = Colors.red.withOpacity(0.8);
-    Path wavePath1 = Path();
-    Path wavePath2 = Path();
-    Path wavePath3 = Path();
-    Path wavePath4 = Path();
-    // 第一层波浪
-    for (double i = -waveLength / 4; i <= waveLength * 1.5; i++) {
-      double dx = i;
-      double dy =
-          sin((i / waveLength * 2.5 * pi) + (waveAnimationValue * 2 * pi)) *
+    /// 波浪画笔
+    for (var index = 0; index < colorsWave.length; index++) {
+      wavePaints.add(Paint()..color = colorsWave[index]);
+      paths.add(Path());
+    }
+
+    double sindy = 2.5;
+    if (paths.length == 1) {
+      sindy = 1.5;
+    } else if (paths.length == 2) {
+      sindy = 2.0;
+    }
+
+    /// 绘制波浪
+    for (var index = 0; index < paths.length; index++) {
+      for (double i = -waveLength / 4; i <= waveLength * 1.5; i++) {
+        double dx = i;
+        double dy;
+        dy =
+            sin((i / waveLength * sindy * pi) + (waveAnimationValue * 2 * pi)) *
+                    waveHeight +
+                centerY;
+        if (index == 1) {
+          dy = sin((i / waveLength * sindy * pi) +
+                      (waveAnimationValue * 2 * pi) +
+                      pi / 2) *
                   waveHeight +
               centerY;
-      if (i == -waveLength / 4) {
-        wavePath1.moveTo(dx, dy);
-      } else {
-        wavePath1.lineTo(dx, dy);
+        } else if (index == 2) {
+          dy = sin((i / waveLength * sindy * pi) +
+                      (waveAnimationValue * 2 * pi) +
+                      pi) *
+                  waveHeight +
+              centerY;
+        }
+        if (i == -waveLength / 4) {
+          paths[index].moveTo(dx, dy);
+        } else {
+          paths[index].lineTo(dx, dy);
+        }
       }
+      sindy -= .5;
     }
-
-    // 第二层波浪
-    for (double i = -waveLength / 4; i <= waveLength * 1.25; i++) {
-      double dx = i;
-      double dy = sin((i / waveLength * 2 * pi) +
-                  (waveAnimationValue * 2 * pi) +
-                  pi / 2) *
-              waveHeight +
-          centerY;
-      if (i == -waveLength / 4) {
-        wavePath2.moveTo(dx, dy);
-      } else {
-        wavePath2.lineTo(dx, dy);
-      }
+    for (var index = 0; index < paths.length; index++) {
+      paths[index].lineTo(size.width * 3, size.height);
+      paths[index].lineTo(-waveLength / 4, size.height);
+      paths[index].close();
     }
-
-    // 第三层波浪
-    for (double i = -waveLength / 4; i <= waveLength * 1.25; i++) {
-      double dx = i;
-      double dy = sin((i / waveLength * 1.5 * pi) +
-                  (waveAnimationValue * 2 * pi) +
-                  pi) *
-              waveHeight +
-          centerY;
-      if (i == -waveLength / 4) {
-        wavePath3.moveTo(dx, dy);
-      } else {
-        wavePath3.lineTo(dx, dy);
-      }
-    }
-
-    // 第三层波浪
-    for (double i = -waveLength / 4; i <= waveLength * 1.25; i++) {
-      double dx = i;
-      double dy = sin((i / waveLength * 1.5 * pi) +
-                  (waveAnimationValue * 2 * pi) +
-                  pi) *
-              waveHeight +
-          centerY;
-      if (i == -waveLength / 4) {
-        wavePath4.moveTo(dx, dy);
-      } else {
-        wavePath4.lineTo(dx, dy);
-      }
-    }
-
-    wavePath1.lineTo(size.width * 3, size.height);
-    wavePath1.lineTo(-waveLength / 4, size.height);
-    wavePath1.close();
-
-    wavePath2.lineTo(size.width * 3, size.height);
-    wavePath2.lineTo(-waveLength / 4, size.height);
-    wavePath2.close();
-
-    wavePath3.lineTo(size.width * 3, size.height);
-    wavePath3.lineTo(-waveLength / 4, size.height);
-    wavePath3.close();
-
-    wavePath4.lineTo(size.width * 3, size.height);
-    wavePath4.lineTo(-waveLength / 4, size.height);
-    wavePath4.close();
 
     // 绘制圆形背景
     canvas.drawCircle(Offset(radius, radius), radius, circlePaint);
@@ -262,11 +240,9 @@ class MultiLayerWaterWavePainter extends CustomPainter {
           Rect.fromCircle(center: Offset(radius, radius), radius: radius)));
 
     // 绘制多层波浪
-    canvas.drawPath(wavePath1, wavePaint1);
-    canvas.drawPath(wavePath2, wavePaint2);
-    canvas.drawPath(wavePath3, wavePaint3);
-
-    canvas.drawPath(wavePath4, wavePaint4);
+    for (var i = 0; i < wavePaints.length; i++) {
+      canvas.drawPath(paths[i], wavePaints[i]);
+    }
   }
 
   @override
