@@ -1,127 +1,182 @@
+// ignore_for_file: use_super_parameters
+
 import 'dart:math';
 
 import 'package:flutter/material.dart';
 
-import 'package:flutter/material.dart';
-import 'dart:math';
+class WaveProgressBarPainter extends CustomPainter {
+  final double progress; // 进度 0.0 到 1.0
+  final double wavePhase; // 波浪相位，用于控制波浪动画
 
-void main() => runApp(MyApp());
+  WaveProgressBarPainter(this.progress, this.wavePhase);
 
-class MyApp extends StatelessWidget {
   @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      home: Scaffold(
-        appBar: AppBar(title: Text('波浪进度按钮')),
-        body: Center(
-          child: WaveProgressButton(
-            width: 200, // 设置按钮宽度
-            height: 60, // 设置按钮高度
-          ),
+  void paint(Canvas canvas, Size size) {
+    // 设置矩形和波浪的颜色
+    Paint backgroundPaint = Paint()
+      ..color = Colors.blue // 背景颜色
+      ..style = PaintingStyle.fill;
+
+    Paint wavePaint = Paint()
+      ..color = Colors.lightBlue // 波浪颜色
+      ..style = PaintingStyle.fill;
+
+    // 创建矩形路径
+    Rect rect = Rect.fromCenter(
+        center: Offset(size.width / 2, size.height / 2),
+        width: 300,
+        height: size.height);
+
+    // 绘制矩形背景
+    canvas.drawRect(rect, backgroundPaint);
+
+    // 创建波浪路径
+    Path wavePath = Path();
+    double waveHeight = 20.0; // 波浪高度
+    double waveLength = 100.0; // 波长
+
+    // 计算进度条高度，从高度的一半开始
+    double progressHeight = size.height / 2 * (1 - progress);
+
+    wavePath.moveTo(rect.left - wavePhase, rect.bottom);
+    for (double x = rect.left - wavePhase;
+        x <= rect.right + waveLength;
+        x += waveLength) {
+      wavePath.quadraticBezierTo(
+        x + waveLength / 4,
+        rect.bottom - waveHeight + progressHeight,
+        x + waveLength / 2,
+        rect.bottom + progressHeight,
+      );
+    }
+    wavePath.lineTo(rect.right, rect.bottom);
+    wavePath.lineTo(rect.right, rect.top);
+    wavePath.lineTo(rect.left, rect.top);
+    wavePath.close();
+
+    // 使用裁剪来限制波浪的绘制区域
+    canvas.clipRect(rect);
+
+    // 绘制波浪
+    canvas.drawPath(wavePath, wavePaint);
+
+    // 如果需要在波浪上显示进度文本
+    TextPainter textPainter = TextPainter(
+      text: TextSpan(
+        text: "${(progress * 100).toInt()}%",
+        style: TextStyle(
+          color: Colors.white,
+          fontSize: 20,
+          fontWeight: FontWeight.bold,
         ),
       ),
+      textDirection: TextDirection.ltr,
     );
+    textPainter.layout(
+      minWidth: 0,
+      maxWidth: size.width,
+    );
+    Offset textOffset = Offset(rect.center.dx - textPainter.width / 2,
+        rect.center.dy - textPainter.height / 2);
+    textPainter.paint(canvas, textOffset);
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) {
+    return true;
   }
 }
 
-class WaveProgressButton extends StatefulWidget {
-  final double width;
-  final double height;
+class WaveProgressBar extends StatefulWidget {
+  final double progress;
 
-  const WaveProgressButton(
-      {Key? key, required this.width, required this.height})
-      : super(key: key);
+  WaveProgressBar({required this.progress});
 
   @override
-  _WaveProgressButtonState createState() => _WaveProgressButtonState();
+  _WaveProgressBarState createState() => _WaveProgressBarState();
 }
 
-class _WaveProgressButtonState extends State<WaveProgressButton>
-    with SingleTickerProviderStateMixin {
-  late AnimationController _controller;
+class _WaveProgressBarState extends State<WaveProgressBar>
+    with TickerProviderStateMixin {
+  late AnimationController _waveController;
+  late AnimationController _progressController;
+  late Animation<double> _progressAnimation;
+  double _wavePhase = 0.0;
+  double _currentProgress = 0.0;
 
   @override
   void initState() {
     super.initState();
-    _controller = AnimationController(
+
+    // 初始化波浪动画控制器，动画速度减慢
+    _waveController = AnimationController(
       vsync: this,
-      duration: Duration(seconds: 4), // 动画持续时间
-    )..repeat(); // 无限循环播放
+      duration: Duration(seconds: 4), // 调整持续时间让波浪更缓慢
+    )..repeat(); // 不断重复动画
+
+    // 波浪动画
+    _waveController.addListener(() {
+      setState(() {
+        _wavePhase += 5; // 控制波浪相位的移动速度，调慢波浪移动
+        if (_wavePhase > 100) {
+          _wavePhase -= 100;
+        }
+      });
+    });
+
+    // 初始化进度条动画控制器
+    _progressController = AnimationController(
+      vsync: this,
+      duration: Duration(seconds: 2), // 控制进度条变化的动画时长
+    );
+
+    // 进度动画
+    _progressAnimation = Tween<double>(
+      begin: 0.0,
+      end: widget.progress,
+    ).animate(_progressController)
+      ..addListener(() {
+        setState(() {
+          _currentProgress = _progressAnimation.value;
+        });
+      });
+
+    // 开始进度条动画
+    _progressController.forward();
+  }
+
+  @override
+  void didUpdateWidget(WaveProgressBar oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.progress != widget.progress) {
+      // 更新进度条动画的目标值
+      _progressAnimation = Tween<double>(
+        begin: _currentProgress,
+        end: widget.progress,
+      ).animate(_progressController)
+        ..addListener(() {
+          setState(() {
+            _currentProgress = _progressAnimation.value;
+          });
+        });
+
+      // 重新开始进度条动画
+      _progressController.forward(from: 0.0);
+    }
   }
 
   @override
   void dispose() {
-    _controller.dispose();
+    _waveController.dispose();
+    _progressController.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: () {
-        // 按钮点击处理
-      },
-      child: Stack(
-        alignment: Alignment.center,
-        children: [
-          CustomPaint(
-            size: Size(widget.width, widget.height), // 使用传入的宽度和高度
-            painter: WavePainter(
-              animation: _controller,
-              progress: 0.6, // 可以动态调整进度
-            ),
-          ),
-          Text(
-            "Wave Button",
-            style: TextStyle(color: Colors.white, fontSize: 18),
-          ),
-        ],
-      ),
+    return CustomPaint(
+      painter: WaveProgressBarPainter(_currentProgress, _wavePhase),
+      size: Size(300, 200),
     );
-  }
-}
-
-class WavePainter extends CustomPainter {
-  final Animation<double> animation;
-  final double waveHeight = 8.0; // 波浪高度
-  final double waveLength = 200.0; // 波浪长度，调整平滑度
-  final double waveSpeed = 2.0; // 波浪速度
-  final double progress; // 进度
-
-  WavePainter({required this.animation, required this.progress})
-      : super(repaint: animation);
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    Paint wavePaint = Paint()..color = Colors.blueAccent;
-    Paint progressPaint = Paint()..color = Colors.red;
-
-    // 绘制进度条背景
-    Rect progressRect = Rect.fromLTWH(0, 0, size.width * progress, size.height);
-    canvas.drawRect(progressRect, progressPaint);
-
-    // 绘制波浪效果
-    Path wavePath = Path();
-    double waveOffset = waveSpeed * animation.value * waveLength;
-
-    // 使波浪从画布左侧延伸至右侧，平滑过渡
-    wavePath.moveTo(-waveLength + waveOffset, size.height / 2);
-    for (double i = -waveLength; i <= size.width + waveLength; i += 1) {
-      double y = sin((i / waveLength) * 2 * pi + waveOffset) * waveHeight +
-          size.height / 2;
-      wavePath.lineTo(i, y);
-    }
-    wavePath.lineTo(size.width, size.height);
-    wavePath.lineTo(0, size.height);
-    wavePath.close();
-
-    // 剪切波浪区域
-    canvas.clipRect(progressRect);
-    canvas.drawPath(wavePath, wavePaint);
-  }
-
-  @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) {
-    return true; // 动画更新时重绘
   }
 }

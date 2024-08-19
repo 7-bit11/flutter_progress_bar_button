@@ -38,9 +38,8 @@ class _WaterWaveProgressPageState extends State<CircualrProgressButtonExample> {
                   });
                 }),
           ),
-          WaveProgressButton(
-            width: 200, // 设置按钮宽度
-            height: 60, // 设置按钮高度
+          WaveProgressBar(
+            progress: progress.clamp(0, 1),
           )
         ],
       ),

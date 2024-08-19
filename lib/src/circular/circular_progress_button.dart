@@ -171,6 +171,7 @@ class MultiLayerWaterWavePainter extends CustomPainter {
   /// 2、4、6 排序显示为 最上层为 6 、4 、2
   final List<Color> colorsWave;
 
+  /// 背景颜色
   final Color backgroundColor;
   MultiLayerWaterWavePainter(
       {required this.waveAnimationValue,
