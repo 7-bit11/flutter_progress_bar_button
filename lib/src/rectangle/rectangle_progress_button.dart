@@ -142,6 +142,7 @@ class _CircularAnimatedProgressBarState
                         progress: _progressAnimation.value,
                         waveHeight: widget.waveHeight,
                         colorsWave: widget.colorsWave,
+                        shape: BoxShape.rectangle, // 使用矩形
                         backgroundColor: widget.backgroundColor),
                   )),
               widget.isShowProgress
@@ -193,6 +194,10 @@ class MultiLayerWaterWavePainter extends CustomPainter {
     Paint circlePaint = Paint()..color = backgroundColor;
     List<Paint> wavePaints = [];
     List<Path> paths = [];
+    Rect rect = Rect.fromLTWH(0, 0, size.width, size.height);
+
+    // 绘制矩形背景
+    canvas.drawRect(rect, circlePaint);
 
     /// 波浪画笔
     for (var index = 0; index < colorsWave.length; index++) {
@@ -244,23 +249,27 @@ class MultiLayerWaterWavePainter extends CustomPainter {
     }
 
     // 绘制圆形背景
-    canvas.drawCircle(Offset(radius, radius), radius, circlePaint);
+    // canvas.drawCircle(Offset(radius, radius), radius, circlePaint);
 
     // // 裁剪圆形区域
-    canvas.clipPath(Path()
-      ..addOval(
-          Rect.fromCircle(center: Offset(radius, radius), radius: radius)));
+    // canvas.clipPath(Path()
+    //   ..addOval(
+    //       Rect.fromCircle(center: Offset(radius, radius), radius: radius)));
     // 创建矩形背景
-    Rect rect = Rect.fromLTWH(0, 0, size.width, size.height);
-    canvas.clipPath(Path()
-      ..addOval(
-          Rect.fromCircle(center: Offset(radius, radius), radius: radius)));
+    //Rect rect = Rect.fromLTWH(0, 0, size.width, size.height);
+    // canvas.clipPath(Path()
+    //   ..addOval(
+    //       Rect.fromCircle(center: Offset(radius, radius), radius: radius)));
     // 绘制背景矩形
-    canvas.drawRect(rect, circlePaint);
+    //canvas.drawRect(rect, circlePaint);
+    canvas.save();
+    canvas.clipRect(rect);
     // 绘制多层波浪
     for (var i = 0; i < wavePaints.length; i++) {
       canvas.drawPath(paths[i], wavePaints[i]);
     }
+
+    canvas.restore();
   }
 
   @override
