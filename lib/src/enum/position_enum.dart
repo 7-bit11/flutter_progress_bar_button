@@ -1,0 +1,4 @@
+enum PositionEnum {
+  left,
+  bottom,
+}

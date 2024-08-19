@@ -3,6 +3,7 @@
 import 'dart:math';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_progress_bar_button/src/enum/position_enum.dart';
 
 class RectangleAnimatedProgressBar extends StatefulWidget {
   /// 大小
@@ -38,6 +39,9 @@ class RectangleAnimatedProgressBar extends StatefulWidget {
   /// 圆角
   final double circular;
 
+  ///
+  final PositionEnum enumPosition;
+
   /// 构造方法
   RectangleAnimatedProgressBar(
       {super.key,
@@ -48,13 +52,15 @@ class RectangleAnimatedProgressBar extends StatefulWidget {
       this.curve = Curves.linear,
       this.onPressed,
       this.waveHeight = 12,
-      this.backgroundColor = const Color(0x802196f3),
+      this.backgroundColor = const Color(0x662196f3),
       this.circular = 5.0,
+      this.enumPosition = PositionEnum.bottom,
 
+      /// 波浪颜色&波浪层数
       /// 默认为蓝色
       /// 2、4、6 排序显示为 最上层为 6 、4 、2
       this.colorsWave = const [
-        //Color(0x4D2196f3),
+        Color(0x4D2196f3),
         Color(0x662196f3),
         Color(0xCC2196f3),
       ],
@@ -89,6 +95,9 @@ class _RectangleAnimatedProgressBarState
   @override
   void initState() {
     super.initState();
+    // if (widget.enumPosition == PositionEnum.left) {
+    //   widget.colorsWave = widget.colorsWave.reversed.toList();
+    // }
     _oldProgress = widget.progress;
 
     // 进度动画控制器
@@ -152,6 +161,7 @@ class _RectangleAnimatedProgressBarState
                           progress: _progressAnimation.value,
                           waveHeight: widget.waveHeight,
                           colorsWave: widget.colorsWave,
+                          enumPosition: widget.enumPosition,
                           backgroundColor: widget.backgroundColor),
                     )),
               ),
@@ -184,83 +194,152 @@ class RectangleMultiLayerWaterWavePainter extends CustomPainter {
 
   /// 背景颜色
   final Color backgroundColor;
-
-  RectangleMultiLayerWaterWavePainter({
-    required this.waveAnimationValue,
-    required this.progress,
-    required this.waveHeight,
-    required this.colorsWave,
-    required this.backgroundColor,
-  });
-
+  final PositionEnum enumPosition;
+  RectangleMultiLayerWaterWavePainter(
+      {required this.waveAnimationValue,
+      required this.progress,
+      required this.waveHeight,
+      required this.colorsWave,
+      required this.backgroundColor,
+      required this.enumPosition});
   @override
   void paint(Canvas canvas, Size size) {
-    double waveLength = size.width;
-    double centerY = size.height * (1 - progress);
-    Paint circlePaint = Paint()..color = backgroundColor;
-    List<Paint> wavePaints = [];
-    List<Path> paths = [];
-    Rect rect = Rect.fromLTWH(0, 0, size.width, size.height);
+    if (enumPosition == PositionEnum.bottom) {
+      double waveLength = size.width;
+      double centerY = size.height * (1 - progress);
+      Paint circlePaint = Paint()..color = backgroundColor;
+      List<Paint> wavePaints = [];
+      List<Path> paths = [];
+      Rect rect = Rect.fromLTWH(0, 0, size.width, size.height);
 
-    // 绘制矩形背景
-    canvas.drawRect(rect, circlePaint);
+      // 绘制矩形背景
+      canvas.drawRect(rect, circlePaint);
 
-    /// 波浪画笔
-    for (var index = 0; index < colorsWave.length; index++) {
-      wavePaints.add(Paint()..color = colorsWave[index]);
-      paths.add(Path());
-    }
+      /// 波浪画笔
+      for (var index = 0; index < colorsWave.length; index++) {
+        wavePaints.add(Paint()..color = colorsWave[index]);
+        paths.add(Path());
+      }
 
-    double sindy = 2.5;
-    if (paths.length == 1) {
-      sindy = 1.5;
-    } else if (paths.length == 2) {
-      sindy = 2.0;
-    }
+      double sindy = 2.5;
+      if (paths.length == 1) {
+        sindy = 1.5;
+      } else if (paths.length == 2) {
+        sindy = 2.0;
+      }
 
-    /// 绘制波浪
-    for (var index = 0; index < paths.length; index++) {
-      for (double i = -waveLength / 4; i <= waveLength * 1.5; i++) {
-        double dx = i;
-        double dy;
-        dy =
-            sin((i / waveLength * sindy * pi) + (waveAnimationValue * 2 * pi)) *
+      /// 绘制波浪
+      for (var index = 0; index < paths.length; index++) {
+        for (double i = -waveLength / 4; i <= waveLength * 1.5; i++) {
+          double dx = i;
+          double dy;
+          dy = sin((i / waveLength * sindy * pi) +
+                      (waveAnimationValue * 2 * pi)) *
+                  waveHeight +
+              centerY;
+          if (index == 1) {
+            dy = sin((i / waveLength * sindy * pi) +
+                        (waveAnimationValue * 2 * pi) +
+                        pi / 2) *
                     waveHeight +
                 centerY;
-        if (index == 1) {
-          dy = sin((i / waveLength * sindy * pi) +
-                      (waveAnimationValue * 2 * pi) +
-                      pi / 2) *
-                  waveHeight +
-              centerY;
-        } else if (index == 2) {
-          dy = sin((i / waveLength * sindy * pi) +
-                      (waveAnimationValue * 2 * pi) +
-                      pi) *
-                  waveHeight +
-              centerY;
+          } else if (index == 2) {
+            dy = sin((i / waveLength * sindy * pi) +
+                        (waveAnimationValue * 2 * pi) +
+                        pi) *
+                    waveHeight +
+                centerY;
+          }
+          if (i == -waveLength / 4) {
+            paths[index].moveTo(dx, dy);
+          } else {
+            paths[index].lineTo(dx, dy);
+          }
         }
-        if (i == -waveLength / 4) {
-          paths[index].moveTo(dx, dy);
-        } else {
-          paths[index].lineTo(dx, dy);
-        }
+        sindy -= .5;
       }
-      sindy -= .5;
-    }
-    for (var index = 0; index < paths.length; index++) {
-      paths[index].lineTo(size.width * 3, size.height);
-      paths[index].lineTo(-waveLength / 4, size.height);
-      paths[index].close();
-    }
-    canvas.save();
-    canvas.clipRect(rect);
-    // 绘制多层波浪
-    for (var i = 0; i < wavePaints.length; i++) {
-      canvas.drawPath(paths[i], wavePaints[i]);
-    }
+      for (var index = 0; index < paths.length; index++) {
+        paths[index].lineTo(size.width * 3, size.height);
+        paths[index].lineTo(-waveLength / 4, size.height);
+        paths[index].close();
+      }
+      canvas.save();
+      canvas.clipRect(rect);
+      // 绘制多层波浪
+      for (var i = 0; i < wavePaints.length; i++) {
+        canvas.drawPath(paths[i], wavePaints[i]);
+      }
 
-    canvas.restore();
+      canvas.restore();
+    } else if (enumPosition == PositionEnum.left) {
+      double waveLength = size.height; // 将波浪长度改为根据高度计算
+      double centerX = size.width * progress; // 使用进度控制 X 轴位置
+      Paint circlePaint = Paint()..color = backgroundColor;
+      List<Paint> wavePaints = [];
+      List<Path> paths = [];
+      Rect rect = Rect.fromLTWH(0, 0, size.width, size.height);
+
+      // 绘制矩形背景
+      canvas.drawRect(rect, circlePaint);
+
+      /// 波浪画笔
+      for (var index = 0; index < colorsWave.length; index++) {
+        wavePaints.add(Paint()..color = colorsWave[index]);
+        paths.add(Path());
+      }
+
+      double sindy = 2.5;
+      if (paths.length == 1) {
+        sindy = 1.5;
+      } else if (paths.length == 2) {
+        sindy = 2.0;
+      }
+
+      /// 绘制波浪
+      for (var index = 0; index < paths.length; index++) {
+        for (double i = -waveLength / 4; i <= waveLength * 1.5; i++) {
+          double dy = i;
+          double dx;
+          dx = sin((i / waveLength * sindy * pi) +
+                      (waveAnimationValue * 2 * pi)) *
+                  waveHeight +
+              centerX;
+          if (index == 1) {
+            dx = sin((i / waveLength * sindy * pi) +
+                        (waveAnimationValue * 2 * pi) +
+                        pi / 2) *
+                    waveHeight +
+                centerX;
+          } else if (index == 2) {
+            dx = sin((i / waveLength * sindy * pi) +
+                        (waveAnimationValue * 2 * pi) +
+                        pi) *
+                    waveHeight +
+                centerX;
+          }
+          if (i == -waveLength / 4) {
+            paths[index].moveTo(dx, dy);
+          } else {
+            paths[index].lineTo(dx, dy);
+          }
+        }
+        sindy -= .5;
+      }
+
+      for (var index = 0; index < paths.length; index++) {
+        paths[index].lineTo(size.width, size.height * 3);
+        paths[index].lineTo(size.width, -waveLength / 4);
+        paths[index].close();
+      }
+      canvas.save();
+      canvas.clipRect(rect);
+      // 绘制多层波浪
+      for (var i = 0; i < wavePaints.length; i++) {
+        canvas.drawPath(paths[i], wavePaints[i]);
+      }
+
+      canvas.restore();
+    }
   }
 
   @override

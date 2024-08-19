@@ -34,14 +34,23 @@ class _WaterWaveProgressPageState extends State<CircualrProgressButtonExample> {
                   Timer.periodic(const Duration(milliseconds: 1000), (t) {
                     setState(() {
                       progress += .1;
+                      if (progress >= .5) {
+                        t.cancel();
+                      }
                     });
                   });
                 }),
           ),
           const SizedBox(height: 20),
           RectangleAnimatedProgressBar(
-            progress: progress.clamp(0, 1),
-          )
+              progress: progress.clamp(0, 1),
+              enumPosition: PositionEnum.left,
+              colorsWave: const [
+                Color(0x4D2196f3),
+                Color(0x662196f3),
+                Color(0xCC2196f3),
+              ],
+              backgroundColor: Color.fromARGB(204, 243, 33, 33))
         ],
       ),
     );
