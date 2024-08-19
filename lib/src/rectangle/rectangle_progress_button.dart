@@ -32,24 +32,29 @@ class RectangleAnimatedProgressBar extends StatefulWidget {
   /// 背景颜色
   late Color backgroundColor;
 
+  /// 点击事件
   late void Function()? onPressed;
+
+  /// 圆角
+  final double circular;
 
   /// 构造方法
   RectangleAnimatedProgressBar(
       {super.key,
       this.width = 150.0,
-      this.height = 80.0,
+      this.height = 60.0,
       this.progress = .2,
       this.isShowProgress = true,
       this.curve = Curves.linear,
       this.onPressed,
       this.waveHeight = 12,
       this.backgroundColor = const Color(0x802196f3),
+      this.circular = 5.0,
 
       /// 默认为蓝色
       /// 2、4、6 排序显示为 最上层为 6 、4 、2
       this.colorsWave = const [
-        Color(0x4D2196f3),
+        //Color(0x4D2196f3),
         Color(0x662196f3),
         Color(0xCC2196f3),
       ],
@@ -136,17 +141,20 @@ class _RectangleAnimatedProgressBarState
           return Stack(
             alignment: Alignment.center,
             children: [
-              SizedBox(
-                  width: widget.width,
-                  height: widget.height,
-                  child: CustomPaint(
-                    painter: RectangleMultiLayerWaterWavePainter(
-                        waveAnimationValue: _waveController.value,
-                        progress: _progressAnimation.value,
-                        waveHeight: widget.waveHeight,
-                        colorsWave: widget.colorsWave,
-                        backgroundColor: widget.backgroundColor),
-                  )),
+              ClipRRect(
+                borderRadius: BorderRadius.circular(widget.circular),
+                child: SizedBox(
+                    width: widget.width,
+                    height: widget.height,
+                    child: CustomPaint(
+                      painter: RectangleMultiLayerWaterWavePainter(
+                          waveAnimationValue: _waveController.value,
+                          progress: _progressAnimation.value,
+                          waveHeight: widget.waveHeight,
+                          colorsWave: widget.colorsWave,
+                          backgroundColor: widget.backgroundColor),
+                    )),
+              ),
               widget.isShowProgress
                   ? Text('${(_progressAnimation.value * 100).toInt()}%',
                       style: widget.showProgressTextStyle)
@@ -188,7 +196,6 @@ class RectangleMultiLayerWaterWavePainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     double waveLength = size.width;
-    double radius = size.width / 2;
     double centerY = size.height * (1 - progress);
     Paint circlePaint = Paint()..color = backgroundColor;
     List<Paint> wavePaints = [];
@@ -246,21 +253,6 @@ class RectangleMultiLayerWaterWavePainter extends CustomPainter {
       paths[index].lineTo(-waveLength / 4, size.height);
       paths[index].close();
     }
-
-    // 绘制圆形背景
-    // canvas.drawCircle(Offset(radius, radius), radius, circlePaint);
-
-    // // 裁剪圆形区域
-    // canvas.clipPath(Path()
-    //   ..addOval(
-    //       Rect.fromCircle(center: Offset(radius, radius), radius: radius)));
-    // 创建矩形背景
-    //Rect rect = Rect.fromLTWH(0, 0, size.width, size.height);
-    // canvas.clipPath(Path()
-    //   ..addOval(
-    //       Rect.fromCircle(center: Offset(radius, radius), radius: radius)));
-    // 绘制背景矩形
-    //canvas.drawRect(rect, circlePaint);
     canvas.save();
     canvas.clipRect(rect);
     // 绘制多层波浪
