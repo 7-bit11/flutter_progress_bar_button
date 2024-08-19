@@ -4,9 +4,10 @@ import 'dart:math';
 
 import 'package:flutter/material.dart';
 
-class CircularAnimatedProgressBar extends StatefulWidget {
+class RectangleAnimatedProgressBar extends StatefulWidget {
   /// 大小
-  final double size;
+  final double width;
+  final double height;
 
   /// 进度
   final double progress;
@@ -34,9 +35,10 @@ class CircularAnimatedProgressBar extends StatefulWidget {
   late void Function()? onPressed;
 
   /// 构造方法
-  CircularAnimatedProgressBar(
+  RectangleAnimatedProgressBar(
       {super.key,
-      this.size = 150.0,
+      this.width = 150.0,
+      this.height = 80.0,
       this.progress = .2,
       this.isShowProgress = true,
       this.curve = Curves.linear,
@@ -55,17 +57,18 @@ class CircularAnimatedProgressBar extends StatefulWidget {
           fontSize: 20, fontWeight: FontWeight.bold, color: Colors.white)})
       : assert(progress >= 0.0 && progress <= 1.0,
             "Progress must be less than 1 and greater than 0"),
-        assert(size > 0.0, "The size must be greater than 0"),
+        assert(width > 0.0, "The width must be greater than 0"),
+        assert(height > 0.0, "The height must be greater than 0"),
         assert(colorsWave.isNotEmpty && colorsWave.length <= 3,
             "ColorsWave must be not empty and length less than 3");
 
   @override
-  _CircularAnimatedProgressBarState createState() =>
-      _CircularAnimatedProgressBarState();
+  _RectangleAnimatedProgressBarState createState() =>
+      _RectangleAnimatedProgressBarState();
 }
 
-class _CircularAnimatedProgressBarState
-    extends State<CircularAnimatedProgressBar> with TickerProviderStateMixin {
+class _RectangleAnimatedProgressBarState
+    extends State<RectangleAnimatedProgressBar> with TickerProviderStateMixin {
   /// 进度动画控制器
   late AnimationController _progressController;
 
@@ -102,7 +105,7 @@ class _CircularAnimatedProgressBarState
   }
 
   @override
-  void didUpdateWidget(CircularAnimatedProgressBar oldWidget) {
+  void didUpdateWidget(RectangleAnimatedProgressBar oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.progress != widget.progress) {
       _oldProgress = oldWidget.progress;
@@ -134,15 +137,14 @@ class _CircularAnimatedProgressBarState
             alignment: Alignment.center,
             children: [
               SizedBox(
-                  width: widget.size,
-                  height: widget.size,
+                  width: widget.width,
+                  height: widget.height,
                   child: CustomPaint(
-                    painter: MultiLayerWaterWavePainter(
+                    painter: RectangleMultiLayerWaterWavePainter(
                         waveAnimationValue: _waveController.value,
                         progress: _progressAnimation.value,
                         waveHeight: widget.waveHeight,
                         colorsWave: widget.colorsWave,
-                        shape: BoxShape.rectangle, // 使用矩形
                         backgroundColor: widget.backgroundColor),
                   )),
               widget.isShowProgress
@@ -157,7 +159,7 @@ class _CircularAnimatedProgressBarState
   }
 }
 
-class MultiLayerWaterWavePainter extends CustomPainter {
+class RectangleMultiLayerWaterWavePainter extends CustomPainter {
   /// 水波纹动画值
   final double waveAnimationValue;
 
@@ -175,15 +177,12 @@ class MultiLayerWaterWavePainter extends CustomPainter {
   /// 背景颜色
   final Color backgroundColor;
 
-  /// 添加属性来指定形状
-  final BoxShape shape;
-  MultiLayerWaterWavePainter({
+  RectangleMultiLayerWaterWavePainter({
     required this.waveAnimationValue,
     required this.progress,
     required this.waveHeight,
     required this.colorsWave,
     required this.backgroundColor,
-    this.shape = BoxShape.circle, // 默认为圆形,
   });
 
   @override

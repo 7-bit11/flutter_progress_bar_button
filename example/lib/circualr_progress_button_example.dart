@@ -38,7 +38,8 @@ class _WaterWaveProgressPageState extends State<CircualrProgressButtonExample> {
                   });
                 }),
           ),
-          WaveProgressBar(
+          const SizedBox(height: 20),
+          RectangleAnimatedProgressBar(
             progress: progress.clamp(0, 1),
           )
         ],
