@@ -28,19 +28,20 @@ class _WaterWaveProgressPageState extends State<CircualrProgressButtonExample> {
         children: [
           Center(
             child: CircularAnimatedProgressBar(
-              size: 200,
-              progress: progress.clamp(0, 1),
-            ),
-          ),
-          TextButton(
-              onPressed: () {
-                Timer.periodic(const Duration(milliseconds: 1000), (t) {
-                  setState(() {
-                    progress += .1;
+                size: 100,
+                progress: progress.clamp(0, 1),
+                onPressed: () {
+                  Timer.periodic(const Duration(milliseconds: 1000), (t) {
+                    setState(() {
+                      progress += .1;
+                    });
                   });
-                });
-              },
-              child: Text("开始"))
+                }),
+          ),
+          WaveProgressButton(
+            width: 200, // 设置按钮宽度
+            height: 60, // 设置按钮高度
+          )
         ],
       ),
     );

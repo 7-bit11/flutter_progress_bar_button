@@ -31,6 +31,8 @@ class CircularAnimatedProgressBar extends StatefulWidget {
   /// 背景颜色
   late Color backgroundColor;
 
+  late void Function()? onPressed;
+
   /// 构造方法
   CircularAnimatedProgressBar(
       {super.key,
@@ -38,6 +40,7 @@ class CircularAnimatedProgressBar extends StatefulWidget {
       this.progress = .2,
       this.isShowProgress = true,
       this.curve = Curves.linear,
+      this.onPressed,
       this.waveHeight = 12,
       this.backgroundColor = const Color(0x802196f3),
 
@@ -49,7 +52,7 @@ class CircularAnimatedProgressBar extends StatefulWidget {
         Color(0xCC2196f3),
       ],
       this.showProgressTextStyle = const TextStyle(
-          fontSize: 24, fontWeight: FontWeight.bold, color: Colors.white)})
+          fontSize: 20, fontWeight: FontWeight.bold, color: Colors.white)})
       : assert(progress >= 0.0 && progress <= 1.0,
             "Progress must be less than 1 and greater than 0"),
         assert(size > 0.0, "The size must be greater than 0"),
@@ -122,30 +125,33 @@ class _CircularAnimatedProgressBarState
 
   @override
   Widget build(BuildContext context) {
-    return AnimatedBuilder(
-      animation: Listenable.merge([_progressController, _waveController]),
-      builder: (context, child) {
-        return Stack(
-          alignment: Alignment.center,
-          children: [
-            SizedBox(
-                width: widget.size,
-                height: widget.size,
-                child: CustomPaint(
-                  painter: MultiLayerWaterWavePainter(
-                      waveAnimationValue: _waveController.value,
-                      progress: _progressAnimation.value,
-                      waveHeight: widget.waveHeight,
-                      colorsWave: widget.colorsWave,
-                      backgroundColor: widget.backgroundColor),
-                )),
-            widget.isShowProgress
-                ? Text('${(_progressAnimation.value * 100).toInt()}%',
-                    style: widget.showProgressTextStyle)
-                : const SizedBox()
-          ],
-        );
-      },
+    return GestureDetector(
+      onTap: widget.onPressed,
+      child: AnimatedBuilder(
+        animation: Listenable.merge([_progressController, _waveController]),
+        builder: (context, child) {
+          return Stack(
+            alignment: Alignment.center,
+            children: [
+              SizedBox(
+                  width: widget.size,
+                  height: widget.size,
+                  child: CustomPaint(
+                    painter: MultiLayerWaterWavePainter(
+                        waveAnimationValue: _waveController.value,
+                        progress: _progressAnimation.value,
+                        waveHeight: widget.waveHeight,
+                        colorsWave: widget.colorsWave,
+                        backgroundColor: widget.backgroundColor),
+                  )),
+              widget.isShowProgress
+                  ? Text('${(_progressAnimation.value * 100).toInt()}%',
+                      style: widget.showProgressTextStyle)
+                  : const SizedBox()
+            ],
+          );
+        },
+      ),
     );
   }
 }
