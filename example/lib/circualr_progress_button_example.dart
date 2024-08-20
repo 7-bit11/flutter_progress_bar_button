@@ -1,7 +1,6 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:flutter/scheduler.dart';
 import 'package:flutter_progress_bar_button/flutter_progress_bar_button.dart';
 
 class CircualrProgressButtonExample extends StatefulWidget {
@@ -24,6 +23,11 @@ class _WaterWaveProgressPageState extends State<CircualrProgressButtonExample> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: const Text("水波球形进度条")),
+      floatingActionButton: FloatingActionButton(onPressed: () {
+        setState(() {
+          progress = 0;
+        });
+      }),
       body: Column(
         children: [
           Center(
@@ -44,13 +48,33 @@ class _WaterWaveProgressPageState extends State<CircualrProgressButtonExample> {
           const SizedBox(height: 20),
           RectangleAnimatedProgressBar(
               progress: progress.clamp(0, 1),
+              enumPosition: PositionEnum.right,
+              colorsWave: const [
+                Color(0x4D2196f3),
+                Color(0x662196f3),
+                Color(0xCC2196f3),
+              ],
+              backgroundColor: const Color.fromARGB(204, 243, 33, 33)),
+          const SizedBox(height: 20),
+          RectangleAnimatedProgressBar(
+              progress: progress.clamp(0, 1),
               enumPosition: PositionEnum.left,
               colorsWave: const [
                 Color(0x4D2196f3),
                 Color(0x662196f3),
                 Color(0xCC2196f3),
               ],
-              backgroundColor: Color.fromARGB(204, 243, 33, 33))
+              backgroundColor: const Color.fromARGB(204, 243, 33, 33)),
+          const SizedBox(height: 20),
+          RectangleAnimatedProgressBar(
+              progress: progress.clamp(0, 1),
+              enumPosition: PositionEnum.bottom,
+              colorsWave: const [
+                Color(0x4D2196f3),
+                Color(0x662196f3),
+                Color(0xCC2196f3),
+              ],
+              backgroundColor: const Color.fromARGB(204, 243, 33, 33))
         ],
       ),
     );

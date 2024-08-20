@@ -204,29 +204,31 @@ class RectangleMultiLayerWaterWavePainter extends CustomPainter {
       required this.enumPosition});
   @override
   void paint(Canvas canvas, Size size) {
+    Paint circlePaint = Paint()..color = backgroundColor;
+    Rect rect = Rect.fromLTWH(0, 0, size.width, size.height);
+    List<Paint> wavePaints = [];
+    List<Path> paths = [];
+    double dynamicWaveHeight = waveHeight * progress;
+    double sindy = 2.5;
+    // 绘制矩形背景
+    canvas.drawRect(rect, circlePaint);
+    if (progress == 1) {
+      dynamicWaveHeight = 0;
+    }
+
+    /// 波浪画笔
+    for (var index = 0; index < colorsWave.length; index++) {
+      wavePaints.add(Paint()..color = colorsWave[index]);
+      paths.add(Path());
+    }
+    if (paths.length == 1) {
+      sindy = 1.5;
+    } else if (paths.length == 2) {
+      sindy = 2.0;
+    }
     if (enumPosition == PositionEnum.bottom) {
       double waveLength = size.width;
       double centerY = size.height * (1 - progress);
-      Paint circlePaint = Paint()..color = backgroundColor;
-      List<Paint> wavePaints = [];
-      List<Path> paths = [];
-      Rect rect = Rect.fromLTWH(0, 0, size.width, size.height);
-
-      // 绘制矩形背景
-      canvas.drawRect(rect, circlePaint);
-
-      /// 波浪画笔
-      for (var index = 0; index < colorsWave.length; index++) {
-        wavePaints.add(Paint()..color = colorsWave[index]);
-        paths.add(Path());
-      }
-
-      double sindy = 2.5;
-      if (paths.length == 1) {
-        sindy = 1.5;
-      } else if (paths.length == 2) {
-        sindy = 2.0;
-      }
 
       /// 绘制波浪
       for (var index = 0; index < paths.length; index++) {
@@ -235,19 +237,19 @@ class RectangleMultiLayerWaterWavePainter extends CustomPainter {
           double dy;
           dy = sin((i / waveLength * sindy * pi) +
                       (waveAnimationValue * 2 * pi)) *
-                  waveHeight +
+                  dynamicWaveHeight +
               centerY;
           if (index == 1) {
             dy = sin((i / waveLength * sindy * pi) +
                         (waveAnimationValue * 2 * pi) +
                         pi / 2) *
-                    waveHeight +
+                    dynamicWaveHeight +
                 centerY;
           } else if (index == 2) {
             dy = sin((i / waveLength * sindy * pi) +
                         (waveAnimationValue * 2 * pi) +
                         pi) *
-                    waveHeight +
+                    dynamicWaveHeight +
                 centerY;
           }
           if (i == -waveLength / 4) {
@@ -263,58 +265,31 @@ class RectangleMultiLayerWaterWavePainter extends CustomPainter {
         paths[index].lineTo(-waveLength / 4, size.height);
         paths[index].close();
       }
-      canvas.save();
-      canvas.clipRect(rect);
-      // 绘制多层波浪
-      for (var i = 0; i < wavePaints.length; i++) {
-        canvas.drawPath(paths[i], wavePaints[i]);
-      }
-
-      canvas.restore();
     } else if (enumPosition == PositionEnum.left) {
       double waveLength = size.height; // 将波浪长度改为根据高度计算
-      double centerX = size.width * progress; // 使用进度控制 X 轴位置
-      Paint circlePaint = Paint()..color = backgroundColor;
-      List<Paint> wavePaints = [];
-      List<Path> paths = [];
-      Rect rect = Rect.fromLTWH(0, 0, size.width, size.height);
-
-      // 绘制矩形背景
-      canvas.drawRect(rect, circlePaint);
-
-      /// 波浪画笔
-      for (var index = 0; index < colorsWave.length; index++) {
-        wavePaints.add(Paint()..color = colorsWave[index]);
-        paths.add(Path());
-      }
-
-      double sindy = 2.5;
-      if (paths.length == 1) {
-        sindy = 1.5;
-      } else if (paths.length == 2) {
-        sindy = 2.0;
-      }
-
-      /// 绘制波浪
+      double centerX = size.width * progress; // 从左往右增长
+      // 动态调整波浪高度，基于进度值
+      // 绘制波浪
       for (var index = 0; index < paths.length; index++) {
         for (double i = -waveLength / 4; i <= waveLength * 1.5; i++) {
           double dy = i;
           double dx;
           dx = sin((i / waveLength * sindy * pi) +
                       (waveAnimationValue * 2 * pi)) *
-                  waveHeight +
+                  dynamicWaveHeight +
               centerX;
+
           if (index == 1) {
             dx = sin((i / waveLength * sindy * pi) +
                         (waveAnimationValue * 2 * pi) +
                         pi / 2) *
-                    waveHeight +
+                    dynamicWaveHeight +
                 centerX;
           } else if (index == 2) {
             dx = sin((i / waveLength * sindy * pi) +
                         (waveAnimationValue * 2 * pi) +
                         pi) *
-                    waveHeight +
+                    dynamicWaveHeight +
                 centerX;
           }
           if (i == -waveLength / 4) {
@@ -325,14 +300,60 @@ class RectangleMultiLayerWaterWavePainter extends CustomPainter {
         }
         sindy -= .5;
       }
-
       for (var index = 0; index < paths.length; index++) {
-        paths[index].lineTo(size.width, size.height * 3);
-        paths[index].lineTo(size.width, -waveLength / 4);
+        paths[index].lineTo(0, size.height * 3);
+        paths[index].lineTo(0, -waveLength / 4);
         paths[index].close();
       }
+    } else if (enumPosition == PositionEnum.right) {
+      double waveLength = size.height; // 将波浪长度改为根据高度计算
+      double centerX = size.width * (1 - progress); // 从右边开始计算
+
+      // 动态调整波浪高度，基于进度值
+
+      // 绘制波浪
+      for (var index = 0; index < paths.length; index++) {
+        for (double i = -waveLength / 4; i <= waveLength * 1.5; i++) {
+          double dy = i;
+          double dx;
+
+          dx = sin((i / waveLength * sindy * pi) +
+                      (waveAnimationValue * 2 * pi)) *
+                  dynamicWaveHeight + // 使用动态波浪高度
+              centerX;
+
+          if (index == 1) {
+            dx = sin((i / waveLength * sindy * pi) +
+                        (waveAnimationValue * 2 * pi) +
+                        pi / 2) *
+                    dynamicWaveHeight + // 使用动态波浪高度
+                centerX;
+          } else if (index == 2) {
+            dx = sin((i / waveLength * sindy * pi) +
+                        (waveAnimationValue * 2 * pi) +
+                        pi) *
+                    dynamicWaveHeight + // 使用动态波浪高度
+                centerX;
+          }
+
+          if (i == -waveLength / 4) {
+            paths[index].moveTo(dx, dy);
+          } else {
+            paths[index].lineTo(dx, dy);
+          }
+        }
+        sindy -= .5;
+      }
+
+      for (var index = 0; index < paths.length; index++) {
+        paths[index].lineTo(0, size.height * 3);
+        paths[index].lineTo(0, -waveLength / 4);
+        paths[index].close();
+      }
+
       canvas.save();
       canvas.clipRect(rect);
+
       // 绘制多层波浪
       for (var i = 0; i < wavePaints.length; i++) {
         canvas.drawPath(paths[i], wavePaints[i]);
@@ -340,6 +361,15 @@ class RectangleMultiLayerWaterWavePainter extends CustomPainter {
 
       canvas.restore();
     }
+
+    canvas.save();
+    canvas.clipRect(rect);
+    // 绘制多层波浪
+    for (var i = 0; i < wavePaints.length; i++) {
+      canvas.drawPath(paths[i], wavePaints[i]);
+    }
+
+    canvas.restore();
   }
 
   @override
