@@ -65,7 +65,7 @@ class RectangleAnimatedProgressBar extends StatefulWidget {
         Color(0xCC2196f3),
       ],
       this.showProgressTextStyle = const TextStyle(
-          fontSize: 20, fontWeight: FontWeight.bold, color: Colors.white)})
+          fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white)})
       : assert(progress >= 0.0 && progress <= 1.0,
             "Progress must be less than 1 and greater than 0"),
         assert(width > 0.0, "The width must be greater than 0"),
@@ -103,7 +103,7 @@ class _RectangleAnimatedProgressBarState
     // 进度动画控制器
     _progressController = AnimationController(
       vsync: this,
-      duration: const Duration(seconds: 1),
+      duration: const Duration(seconds: 2),
     );
 
     _progressAnimation =
@@ -147,6 +147,7 @@ class _RectangleAnimatedProgressBarState
       child: AnimatedBuilder(
         animation: Listenable.merge([_progressController, _waveController]),
         builder: (context, child) {
+          bool isCompleted = _progressAnimation.value >= 1.0;
           return Stack(
             alignment: Alignment.center,
             children: [
@@ -165,10 +166,18 @@ class _RectangleAnimatedProgressBarState
                           backgroundColor: widget.backgroundColor),
                     )),
               ),
-              widget.isShowProgress
-                  ? Text('${(_progressAnimation.value * 100).toInt()}%',
-                      style: widget.showProgressTextStyle)
-                  : const SizedBox()
+              isCompleted
+                  ? ScaleTransition(
+                      scale: Tween<double>(begin: 0.0, end: 1.0).animate(
+                        CurvedAnimation(
+                          parent: _progressController,
+                          curve: Curves.easeOut,
+                        ),
+                      ),
+                      child: Text('完成', style: widget.showProgressTextStyle),
+                    )
+                  : Text('${(_progressAnimation.value * 100).toInt()}%',
+                      style: widget.showProgressTextStyle),
             ],
           );
         },
@@ -214,6 +223,8 @@ class RectangleMultiLayerWaterWavePainter extends CustomPainter {
     canvas.drawRect(rect, circlePaint);
     if (progress == 1) {
       dynamicWaveHeight = 0;
+    } else if (progress >= .6) {
+      dynamicWaveHeight = waveHeight * .6;
     }
 
     /// 波浪画笔
@@ -346,8 +357,8 @@ class RectangleMultiLayerWaterWavePainter extends CustomPainter {
       }
 
       for (var index = 0; index < paths.length; index++) {
-        paths[index].lineTo(0, size.height * 3);
-        paths[index].lineTo(0, -waveLength / 4);
+        paths[index].lineTo(size.width, size.height * 3);
+        paths[index].lineTo(size.width, -waveLength / 4);
         paths[index].close();
       }
 

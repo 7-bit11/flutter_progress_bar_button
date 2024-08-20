@@ -12,7 +12,7 @@ class CircualrProgressButtonExample extends StatefulWidget {
 }
 
 class _WaterWaveProgressPageState extends State<CircualrProgressButtonExample> {
-  double progress = 0.0;
+  int progress = 0;
   @override
   void initState() {
     super.initState();
@@ -33,21 +33,16 @@ class _WaterWaveProgressPageState extends State<CircualrProgressButtonExample> {
           Center(
             child: CircularAnimatedProgressBar(
                 size: 100,
-                progress: progress.clamp(0, 1),
+                progress: (progress.clamp(0, 10) / 10),
                 onPressed: () {
-                  Timer.periodic(const Duration(milliseconds: 1000), (t) {
-                    setState(() {
-                      progress += .1;
-                      if (progress >= .5) {
-                        t.cancel();
-                      }
-                    });
+                  setState(() {
+                    progress += 2;
                   });
                 }),
           ),
           const SizedBox(height: 20),
           RectangleAnimatedProgressBar(
-              progress: progress.clamp(0, 1),
+              progress: (progress.clamp(0, 10) / 10),
               enumPosition: PositionEnum.right,
               colorsWave: const [
                 Color(0x4D2196f3),
@@ -57,7 +52,7 @@ class _WaterWaveProgressPageState extends State<CircualrProgressButtonExample> {
               backgroundColor: const Color.fromARGB(204, 243, 33, 33)),
           const SizedBox(height: 20),
           RectangleAnimatedProgressBar(
-              progress: progress.clamp(0, 1),
+              progress: (progress.clamp(0, 10) / 10),
               enumPosition: PositionEnum.left,
               colorsWave: const [
                 Color(0x4D2196f3),
@@ -67,7 +62,7 @@ class _WaterWaveProgressPageState extends State<CircualrProgressButtonExample> {
               backgroundColor: const Color.fromARGB(204, 243, 33, 33)),
           const SizedBox(height: 20),
           RectangleAnimatedProgressBar(
-              progress: progress.clamp(0, 1),
+              progress: (progress.clamp(0, 10) / 10),
               enumPosition: PositionEnum.bottom,
               colorsWave: const [
                 Color(0x4D2196f3),

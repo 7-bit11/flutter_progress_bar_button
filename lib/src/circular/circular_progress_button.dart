@@ -193,6 +193,10 @@ class MultiLayerWaterWavePainter extends CustomPainter {
     Paint circlePaint = Paint()..color = backgroundColor;
     List<Paint> wavePaints = [];
     List<Path> paths = [];
+    double dynamicWaveHeight = waveHeight * progress;
+    if (progress == 1) {
+      dynamicWaveHeight = 0;
+    }
 
     /// 波浪画笔
     for (var index = 0; index < colorsWave.length; index++) {
@@ -214,19 +218,19 @@ class MultiLayerWaterWavePainter extends CustomPainter {
         double dy;
         dy =
             sin((i / waveLength * sindy * pi) + (waveAnimationValue * 2 * pi)) *
-                    waveHeight +
+                    dynamicWaveHeight +
                 centerY;
         if (index == 1) {
           dy = sin((i / waveLength * sindy * pi) +
                       (waveAnimationValue * 2 * pi) +
                       pi / 2) *
-                  waveHeight +
+                  dynamicWaveHeight +
               centerY;
         } else if (index == 2) {
           dy = sin((i / waveLength * sindy * pi) +
                       (waveAnimationValue * 2 * pi) +
                       pi) *
-                  waveHeight +
+                  dynamicWaveHeight +
               centerY;
         }
         if (i == -waveLength / 4) {
