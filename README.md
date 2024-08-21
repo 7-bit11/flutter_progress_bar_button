@@ -9,7 +9,7 @@ This is a Flutter animation progress button plugin
 - [circular_progress_button](#circular)
 - [rectangle_progress_button](#rectangle)
 
-<img src="./example/assets/example.gif"   width = 230 height = 500 >
+<img src="https://raw.githubusercontent.com/7-bit-zhang/flutter_progress_bar_button/main/example/assets/example.gif"   width = 230 height = 500 >
 
 ### Simple Use Circular
 
@@ -27,9 +27,9 @@ CircularAnimatedProgressBar(
     })
 ```
 
-### Simple Use Circular
+### Simple Use Rectangle
 
-<a id="circular"></a>
+<a id="rectangle"></a>
 
 ```dart
 int progress=5;
