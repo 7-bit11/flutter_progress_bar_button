@@ -42,6 +42,12 @@ class _WaterWaveProgressPageState extends State<CircualrProgressButtonExample> {
           RectangleAnimatedProgressBar(
             progress: (progress.clamp(0, 10) / 10),
             enumPosition: PositionEnum.right,
+            colorsWave: const [
+              Color(0x4D2196f3),
+              Color(0x662196f3),
+              Color(0xCC2196f3),
+            ],
+            backgroundColor: const Color(0x262192F3),
           ),
           const SizedBox(height: 20),
           RectangleAnimatedProgressBar(
