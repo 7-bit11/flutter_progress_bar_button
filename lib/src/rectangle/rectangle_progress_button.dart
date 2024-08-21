@@ -45,6 +45,9 @@ class RectangleAnimatedProgressBar extends StatefulWidget {
   /// 完成后的显示
   final String completedText;
 
+  /// 完成后是否显示波浪动画
+  final bool completedIsShowWave;
+
   /// 构造方法
   RectangleAnimatedProgressBar(
       {super.key,
@@ -55,10 +58,11 @@ class RectangleAnimatedProgressBar extends StatefulWidget {
       this.curve = Curves.linear,
       this.onPressed,
       this.waveHeight = 12,
-      this.backgroundColor = const Color(0x662196f3),
+      this.backgroundColor = const Color(0x262192F3),
       this.circular = 5.0,
       this.completedText = 'Completed',
       this.enumPosition = PositionEnum.bottom,
+      this.completedIsShowWave = true,
 
       /// 波浪颜色&波浪层数
       /// 默认为蓝色
@@ -69,7 +73,12 @@ class RectangleAnimatedProgressBar extends StatefulWidget {
         Color(0xCC2196f3),
       ],
       this.showProgressTextStyle = const TextStyle(
-          fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white)})
+          fontSize: 16,
+          fontWeight: FontWeight.bold,
+          color: Colors.white,
+          shadows: [
+            Shadow(offset: Offset(1, 1), blurRadius: .2, color: Colors.black26)
+          ])})
       : assert(progress >= 0.0 && progress <= 1.0,
             "Progress must be less than 1 and greater than 0"),
         assert(width > 0.0, "The width must be greater than 0"),
@@ -167,7 +176,8 @@ class _RectangleAnimatedProgressBarState
                           waveHeight: widget.waveHeight,
                           colorsWave: widget.colorsWave,
                           enumPosition: widget.enumPosition,
-                          backgroundColor: widget.backgroundColor),
+                          backgroundColor: widget.backgroundColor,
+                          completedIsShowWave: widget.completedIsShowWave),
                     )),
               ),
               widget.isShowProgress
@@ -212,13 +222,17 @@ class RectangleMultiLayerWaterWavePainter extends CustomPainter {
   final Color backgroundColor;
   final PositionEnum enumPosition;
 
+  /// 完成后是否显示波浪动画
+  final bool completedIsShowWave;
+
   RectangleMultiLayerWaterWavePainter(
       {required this.waveAnimationValue,
       required this.progress,
       required this.waveHeight,
       required this.colorsWave,
       required this.backgroundColor,
-      required this.enumPosition});
+      required this.enumPosition,
+      required this.completedIsShowWave});
   @override
   void paint(Canvas canvas, Size size) {
     Paint circlePaint = Paint()..color = backgroundColor;
@@ -229,10 +243,14 @@ class RectangleMultiLayerWaterWavePainter extends CustomPainter {
     double sindy = 2.5;
     // 绘制矩形背景
     canvas.drawRect(rect, circlePaint);
+    dynamicWaveHeight = 5;
     if (progress == 1) {
       dynamicWaveHeight = 0;
     } else if (progress >= .6) {
       dynamicWaveHeight = waveHeight * .6;
+    }
+    if (!completedIsShowWave) {
+      dynamicWaveHeight = 0;
     }
 
     /// 波浪画笔

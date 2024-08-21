@@ -36,6 +36,9 @@ class CircularAnimatedProgressBar extends StatefulWidget {
   /// 完成后的显示
   final String completedText;
 
+  /// 完成后是否显示波浪动画
+  final bool completedIsShowWave;
+
   /// 构造方法
   CircularAnimatedProgressBar(
       {super.key,
@@ -45,8 +48,9 @@ class CircularAnimatedProgressBar extends StatefulWidget {
       this.curve = Curves.linear,
       this.onPressed,
       this.waveHeight = 12,
+      this.completedIsShowWave = true,
       this.completedText = 'Completed',
-      this.backgroundColor = const Color(0x802196f3),
+      this.backgroundColor = const Color(0x0D2192F3),
 
       /// 默认为蓝色
       /// 2、4、6 排序显示为 最上层为 6 、4 、2
@@ -56,7 +60,12 @@ class CircularAnimatedProgressBar extends StatefulWidget {
         Color(0xCC2196f3),
       ],
       this.showProgressTextStyle = const TextStyle(
-          fontSize: 20, fontWeight: FontWeight.bold, color: Colors.white)})
+          fontSize: 20,
+          fontWeight: FontWeight.bold,
+          color: Colors.white,
+          shadows: [
+            Shadow(offset: Offset(1, 1), blurRadius: .2, color: Colors.black26)
+          ])})
       : assert(progress >= 0.0 && progress <= 1.0,
             "Progress must be less than 1 and greater than 0"),
         assert(size > 0.0, "The size must be greater than 0"),
@@ -147,7 +156,8 @@ class _CircularAnimatedProgressBarState
                         progress: _progressAnimation.value,
                         waveHeight: widget.waveHeight,
                         colorsWave: widget.colorsWave,
-                        backgroundColor: widget.backgroundColor),
+                        backgroundColor: widget.backgroundColor,
+                        completedIsShowWave: widget.completedIsShowWave),
                   )),
               widget.isShowProgress
                   ? isCompleted
@@ -192,14 +202,17 @@ class MultiLayerWaterWavePainter extends CustomPainter {
 
   /// 添加属性来指定形状
   final BoxShape shape;
-  MultiLayerWaterWavePainter({
-    required this.waveAnimationValue,
-    required this.progress,
-    required this.waveHeight,
-    required this.colorsWave,
-    required this.backgroundColor,
-    this.shape = BoxShape.circle, // 默认为圆形,
-  });
+
+  /// 完成后是否显示波浪动画
+  final bool completedIsShowWave;
+  MultiLayerWaterWavePainter(
+      {required this.waveAnimationValue,
+      required this.progress,
+      required this.waveHeight,
+      required this.colorsWave,
+      required this.backgroundColor,
+      this.shape = BoxShape.circle, // 默认为圆形,
+      required this.completedIsShowWave});
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -209,9 +222,12 @@ class MultiLayerWaterWavePainter extends CustomPainter {
     Paint circlePaint = Paint()..color = backgroundColor;
     List<Paint> wavePaints = [];
     List<Path> paths = [];
-    double dynamicWaveHeight = waveHeight * progress;
-    if (progress == 1) {
-      dynamicWaveHeight = 0;
+    double dynamicWaveHeight = 5;
+    if (progress == 1 || progress == 0) {
+      dynamicWaveHeight = 8;
+      if (!completedIsShowWave) {
+        dynamicWaveHeight = 0;
+      }
     }
 
     /// 波浪画笔

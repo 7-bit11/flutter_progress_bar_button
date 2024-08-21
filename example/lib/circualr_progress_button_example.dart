@@ -1,5 +1,3 @@
-import 'dart:async';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_progress_bar_button/flutter_progress_bar_button.dart';
 
@@ -12,7 +10,7 @@ class CircualrProgressButtonExample extends StatefulWidget {
 }
 
 class _WaterWaveProgressPageState extends State<CircualrProgressButtonExample> {
-  int progress = 0;
+  int progress = 6;
   @override
   void initState() {
     super.initState();
@@ -32,7 +30,7 @@ class _WaterWaveProgressPageState extends State<CircualrProgressButtonExample> {
         children: [
           Center(
             child: CircularAnimatedProgressBar(
-                size: 100,
+                size: 150,
                 progress: (progress.clamp(0, 10) / 10),
                 onPressed: () {
                   setState(() {
@@ -42,20 +40,19 @@ class _WaterWaveProgressPageState extends State<CircualrProgressButtonExample> {
           ),
           const SizedBox(height: 20),
           RectangleAnimatedProgressBar(
-              progress: (progress.clamp(0, 10) / 10),
-              enumPosition: PositionEnum.right,
-              backgroundColor: const Color.fromARGB(204, 243, 33, 33)),
+            progress: (progress.clamp(0, 10) / 10),
+            enumPosition: PositionEnum.right,
+          ),
           const SizedBox(height: 20),
           RectangleAnimatedProgressBar(
-              progress: (progress.clamp(0, 10) / 10),
-              enumPosition: PositionEnum.left,
-              backgroundColor: const Color.fromARGB(204, 243, 33, 33)),
+            progress: (progress.clamp(0, 10) / 10),
+            enumPosition: PositionEnum.left,
+          ),
           const SizedBox(height: 20),
           RectangleAnimatedProgressBar(
-              isShowProgress: false,
-              progress: (progress.clamp(0, 10) / 10),
-              enumPosition: PositionEnum.bottom,
-              backgroundColor: const Color.fromARGB(204, 243, 33, 33))
+            progress: (progress.clamp(0, 10) / 10),
+            enumPosition: PositionEnum.bottom,
+          )
         ],
       ),
     );
