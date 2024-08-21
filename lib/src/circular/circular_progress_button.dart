@@ -134,6 +134,7 @@ class _CircularAnimatedProgressBarState
       child: AnimatedBuilder(
         animation: Listenable.merge([_progressController, _waveController]),
         builder: (context, child) {
+          bool isCompleted = _progressAnimation.value >= 1.0;
           return Stack(
             alignment: Alignment.center,
             children: [
@@ -149,8 +150,19 @@ class _CircularAnimatedProgressBarState
                         backgroundColor: widget.backgroundColor),
                   )),
               widget.isShowProgress
-                  ? Text('${(_progressAnimation.value * 100).toInt()}%',
-                      style: widget.showProgressTextStyle)
+                  ? isCompleted
+                      ? ScaleTransition(
+                          scale: Tween<double>(begin: 0.0, end: 1.0).animate(
+                            CurvedAnimation(
+                              parent: _progressController,
+                              curve: Curves.easeOut,
+                            ),
+                          ),
+                          child: Text(widget.completedText,
+                              style: widget.showProgressTextStyle),
+                        )
+                      : Text('${(_progressAnimation.value * 100).toInt()}%',
+                          style: widget.showProgressTextStyle)
                   : const SizedBox()
             ],
           );

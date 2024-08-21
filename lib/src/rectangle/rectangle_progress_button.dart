@@ -170,19 +170,21 @@ class _RectangleAnimatedProgressBarState
                           backgroundColor: widget.backgroundColor),
                     )),
               ),
-              isCompleted
-                  ? ScaleTransition(
-                      scale: Tween<double>(begin: 0.0, end: 1.0).animate(
-                        CurvedAnimation(
-                          parent: _progressController,
-                          curve: Curves.easeOut,
-                        ),
-                      ),
-                      child: Text(widget.completedText,
-                          style: widget.showProgressTextStyle),
-                    )
-                  : Text('${(_progressAnimation.value * 100).toInt()}%',
-                      style: widget.showProgressTextStyle),
+              widget.isShowProgress
+                  ? isCompleted
+                      ? ScaleTransition(
+                          scale: Tween<double>(begin: 0.0, end: 1.0).animate(
+                            CurvedAnimation(
+                              parent: _progressController,
+                              curve: Curves.easeOut,
+                            ),
+                          ),
+                          child: Text(widget.completedText,
+                              style: widget.showProgressTextStyle),
+                        )
+                      : Text('${(_progressAnimation.value * 100).toInt()}%',
+                          style: widget.showProgressTextStyle)
+                  : const SizedBox()
             ],
           );
         },
