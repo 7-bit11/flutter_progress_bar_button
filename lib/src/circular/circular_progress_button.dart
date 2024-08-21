@@ -33,6 +33,9 @@ class CircularAnimatedProgressBar extends StatefulWidget {
 
   late void Function()? onPressed;
 
+  /// 完成后的显示
+  final String completedText;
+
   /// 构造方法
   CircularAnimatedProgressBar(
       {super.key,
@@ -42,6 +45,7 @@ class CircularAnimatedProgressBar extends StatefulWidget {
       this.curve = Curves.linear,
       this.onPressed,
       this.waveHeight = 12,
+      this.completedText = 'Completed',
       this.backgroundColor = const Color(0x802196f3),
 
       /// 默认为蓝色

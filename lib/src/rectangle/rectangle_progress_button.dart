@@ -42,6 +42,9 @@ class RectangleAnimatedProgressBar extends StatefulWidget {
   ///
   final PositionEnum enumPosition;
 
+  /// 完成后的显示
+  final String completedText;
+
   /// 构造方法
   RectangleAnimatedProgressBar(
       {super.key,
@@ -54,6 +57,7 @@ class RectangleAnimatedProgressBar extends StatefulWidget {
       this.waveHeight = 12,
       this.backgroundColor = const Color(0x662196f3),
       this.circular = 5.0,
+      this.completedText = 'Completed',
       this.enumPosition = PositionEnum.bottom,
 
       /// 波浪颜色&波浪层数
@@ -174,7 +178,8 @@ class _RectangleAnimatedProgressBarState
                           curve: Curves.easeOut,
                         ),
                       ),
-                      child: Text('完成', style: widget.showProgressTextStyle),
+                      child: Text(widget.completedText,
+                          style: widget.showProgressTextStyle),
                     )
                   : Text('${(_progressAnimation.value * 100).toInt()}%',
                       style: widget.showProgressTextStyle),
@@ -204,6 +209,7 @@ class RectangleMultiLayerWaterWavePainter extends CustomPainter {
   /// 背景颜色
   final Color backgroundColor;
   final PositionEnum enumPosition;
+
   RectangleMultiLayerWaterWavePainter(
       {required this.waveAnimationValue,
       required this.progress,
